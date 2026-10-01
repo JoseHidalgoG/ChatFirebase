@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -41,7 +42,13 @@ dependencies {
     implementation(libs.material)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
 }
