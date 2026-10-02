@@ -1,6 +1,33 @@
 <resources>
     <string name="app_name">ChatFirebase</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_logout">Log out</string>
+
+    <!-- Pantallas de autenticación -->
+    <string name="login_title">Bienvenido de vuelta</string>
+    <string name="login_subtitle">Inicia sesión para empezar a chatear</string>
+    <string name="register_title">Crear Cuenta</string>
+    <string name="hint_name">Nombre</string>
+    <string name="hint_email">Correo</string>
+    <string name="hint_password">Contraseña</string>
+    <string name="hint_confirm_password">Confirmar contraseña </string>
+    <string name="helper_password">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="action_login">Iniciar Sesión</string>
+    <string name="action_register">Registrar</string>
+    <string name="action_go_to_register">Crea una cuenta</string>
+    <string name="action_go_to_login">Ya tienes una cuenta? Inicia sesión</string>
+
+    <!-- Para los errroes de autenticación -->
+    <string name="error_field_required">Este campo es requerido</string>
+    <string name="error_email_invalid">Email inválido</string>
+    <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_password_mismatch">La contraseña no concuerda</string>
+    <string name="error_password_weak">La contraseña es muy débil</string>
+    <string name="error_email_in_use">Ya hay una cuenta con este correo</string>
+    <string name="error_invalid_credentials">Correo o contraseña incorrectos</string>
+    <string name="error_network">Sin conexión a internet. Intenta de nuevo más tarde.</string>
+    <string name="error_too_many_requests">Muchos intentos. Intenta de nuevo más tarde.</string>
+    <string name="error_profile_save">La cuenta ha sido creada, pero hubo un error al guardar el perfil. Inicie sesión de nuevo.</string>
+    <string name="error_auth_generic">Algo salió mal. Intente de nuevo</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
