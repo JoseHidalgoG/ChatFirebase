@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.chats.ChatsFragment">
 
-    
+
     <LinearLayout
         android:id="@+id/empty_state"
         tools:ignore="UselessParent"
