@@ -54,16 +54,16 @@ public class AuthRepository {
                     UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder()
                             .setDisplayName(name)
                             .build();
-                    // The Firestore doc is the source of truth for the name, so a failed
-                    // profile update is not fatal.
+                    // El documento de Firestore es la fuente de verdad del nombre, así que
+                    // si falla la actualización del perfil no es grave.
                     firebaseUser.updateProfile(profile);
 
                     User user = new User(firebaseUser.getUid(), name, email);
                     userDoc(user.getUid()).set(user)
                             .addOnSuccessListener(unused -> callback.onSuccess(user))
                             .addOnFailureListener(e -> {
-                                // Don't leave a half-registered user signed in; the doc is
-                                // recreated on their next login.
+                                // No se deja con sesión a un usuario registrado a medias; el
+                                // documento se vuelve a crear en su próximo inicio de sesión.
                                 auth.signOut();
                                 callback.onError(R.string.error_profile_save);
                             });
@@ -109,7 +109,7 @@ public class AuthRepository {
                     doc.set(created);
                     callback.onSuccess(created);
                 })
-                // Sign-in itself succeeded; fall back to what FirebaseAuth knows.
+                // El inicio de sesión sí funcionó; se usan los datos que tiene FirebaseAuth.
                 .addOnFailureListener(e -> callback.onSuccess(fromFirebaseUser(firebaseUser)));
     }
 
@@ -139,7 +139,7 @@ public class AuthRepository {
             return R.string.error_password_weak;
         } else if (e instanceof FirebaseAuthInvalidUserException
                 || e instanceof FirebaseAuthInvalidCredentialsException) {
-            // Kept identical on purpose: don't reveal whether the email is registered.
+            // Mismo mensaje a propósito: no revela si el correo está registrado.
             return R.string.error_invalid_credentials;
         } else if (e instanceof FirebaseNetworkException) {
             return R.string.error_network;

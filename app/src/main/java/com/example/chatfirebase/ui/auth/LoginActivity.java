@@ -30,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
-        // FirebaseAuth persists the session, so returning users skip this screen.
+        // FirebaseAuth guarda la sesión, así que quien ya inició sesión se salta esta pantalla.
         if (viewModel.isLoggedIn()) {
             openMain();
             return;
