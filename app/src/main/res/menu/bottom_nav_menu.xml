@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Los ids son los de los destinos en nav_graph para que NavigationUI los enlace. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/chatsFragment"
+        android:icon="@drawable/ic_chat"
+        android:title="@string/nav_chats" />
+    <item
+        android:id="@+id/contactsFragment"
+        android:icon="@drawable/ic_people"
+        android:title="@string/nav_contacts" />
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@drawable/ic_person"
+        android:title="@string/nav_profile" />
+</menu>
