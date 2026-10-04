@@ -29,7 +29,7 @@
     <string name="error_profile_save">La cuenta ha sido creada, pero hubo un error al guardar el perfil. Inicie sesión de nuevo.</string>
     <string name="error_auth_generic">Algo salió mal. Intente de nuevo</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
+    <string name="first_fragment_label">Contactos</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
