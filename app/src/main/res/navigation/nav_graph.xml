@@ -16,11 +16,36 @@
         android:id="@+id/contactsFragment"
         android:name="com.example.chatfirebase.ui.contacts.ContactsFragment"
         android:label="@string/nav_contacts"
-        tools:layout="@layout/fragment_contacts" />
+        tools:layout="@layout/fragment_contacts">
+        <action
+            android:id="@+id/action_contactsFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.chatfirebase.ui.profile.ProfileFragment"
         android:label="@string/nav_profile"
         tools:layout="@layout/fragment_profile" />
+
+    <!-- Esto se refiere al chat individual, no a la lista de chats -->
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.chatfirebase.ui.chats.ChatFragment"
+        android:label="Conversación"
+        tools:layout="@layout/fragment_chat">
+
+        <argument
+            android:name="chatId"
+            app:argType="string" />
+
+        <argument
+            android:name="otherUserId"
+            app:argType="string" />
+
+        <argument
+            android:name="otherUserName"
+            app:argType="string" />
+
+    </fragment>
 </navigation>

@@ -22,48 +22,81 @@ import com.example.chatfirebase.ui.main.MainViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
-    private MainViewModel viewModel;
-    private NavController navController;
+    private ActivityMainBinding binding;
     private AppBarConfiguration appBarConfiguration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
-
-        // Si no hay sesión (p. ej. se llega desde una notificación tras cerrar sesión), al login.
-        if (!viewModel.isLoggedIn()) {
-            openLogin();
-            return;
-        }
 
         EdgeToEdge.enable(this);
-        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
-            // La barra inferior se extiende bajo la barra de navegación del sistema.
-            binding.bottomNav.setPadding(0, 0, 0, systemBars.bottom);
-            // Se consumen para que ninguna vista hija vuelva a sumar el mismo padding.
-            return WindowInsetsCompat.CONSUMED;
-        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                binding.main,
+                (view, windowInsets) -> {
+                    Insets systemBars = windowInsets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    view.setPadding(
+                            systemBars.left,
+                            systemBars.top,
+                            systemBars.right,
+                            systemBars.bottom
+                    );
+
+                    return windowInsets;
+                }
+        );
+
         setSupportActionBar(binding.toolbar);
 
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment);
-        navController = navHostFragment.getNavController();
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.nav_host_fragment);
 
-        // Las pestañas son destinos de primer nivel, así que no muestran la flecha de "atrás".
-        appBarConfiguration = new AppBarConfiguration.Builder(binding.bottomNav.getMenu()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(binding.bottomNav, navController);
+        if (navHostFragment == null) {
+            throw new IllegalStateException(
+                    "No se encontró el NavHostFragment."
+            );
+        }
 
-        viewModel.getCurrentUser().observe(this, user -> {
-            if (user == null) {
-                openLogin();
-            }
-        });
+        NavController navController = navHostFragment.getNavController();
+
+
+        navController.addOnDestinationChangedListener(
+                (controller, destination, arguments) -> {
+                    int destinationId = destination.getId();
+
+                    if (destinationId == R.id.chatsFragment) {
+                        binding.toolbar.setTitle("Chats");
+                    } else if (destinationId == R.id.contactsFragment) {
+                        binding.toolbar.setTitle("Contactos");
+                    } else if (destinationId == R.id.profileFragment) {
+                        binding.toolbar.setTitle("Perfil");
+                    }
+                }
+        );
+
+        appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.chatsFragment,
+                R.id.contactsFragment,
+                R.id.profileFragment
+        ).build();
+
+        NavigationUI.setupActionBarWithNavController(
+                this,
+                navController,
+                appBarConfiguration
+        );
+
+        NavigationUI.setupWithNavController(
+                binding.bottomNav,
+                navController
+        );
     }
 
     @Override
@@ -74,24 +107,46 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         if (item.getItemId() == R.id.action_logout) {
-            // El observer de getCurrentUser() se encarga de volver al login.
-            viewModel.logout();
+
+            new ViewModelProvider(this)
+                    .get(MainViewModel.class)
+                    .logout();
+
+            Intent intent = new Intent(
+                    this,
+                    LoginActivity.class
+            );
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
+            );
+
+            startActivity(intent);
+            finish();
+
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
-    }
 
-    private void openLogin() {
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.nav_host_fragment);
+
+        if (navHostFragment != null) {
+            return NavigationUI.navigateUp(
+                    navHostFragment.getNavController(),
+                    appBarConfiguration
+            );
+        }
+
+        return super.onSupportNavigateUp();
     }
 }

@@ -29,7 +29,7 @@
     <string name="error_profile_save">La cuenta ha sido creada, pero hubo un error al guardar el perfil. Inicie sesión de nuevo.</string>
     <string name="error_auth_generic">Algo salió mal. Intente de nuevo</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
+    <string name="first_fragment_label">Contactos</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
@@ -70,4 +70,15 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+
+    <string name="nav_chats">Chats</string>
+    <string name="nav_contacts">Contactos</string>
+    <string name="nav_profile">Perfil</string>
+
+    <string name="chats_empty_title">Todavía no tienes chats</string>
+    <string name="chats_empty_message">Cuando inicies una conversación, aparecerá aquí.</string>
+
+    <string name="contacts_empty_title">Todavía no hay otros usuarios</string>
+    <string name="contacts_empty_message">Cuando alguien más se registre, aparecerá aquí.</string>
+
 </resources>
