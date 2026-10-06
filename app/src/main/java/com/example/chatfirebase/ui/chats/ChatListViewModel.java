@@ -11,34 +11,43 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatsViewModel extends ViewModel {
-
-    private final MutableLiveData<List<Chat>> chats =
-            new MutableLiveData<>(new ArrayList<>());
-
-    private final MutableLiveData<String> error =
-            new MutableLiveData<>();
+public class ChatListViewModel extends ViewModel {
 
     private final ChatRepository repository;
-    private final ListenerRegistration registration;
+    private final MutableLiveData<List<Chat>> chats =
+            new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<String> errorMessage =
+            new MutableLiveData<>();
+    private ListenerRegistration chatsListener;
 
-    public ChatsViewModel() {
+    public ChatListViewModel() {
         repository = new ChatRepository();
-        registration = repository.listenToChats(chats, error);
     }
 
     public LiveData<List<Chat>> getChats() {
         return chats;
     }
 
-    public LiveData<String> getError() {
-        return error;
+    public LiveData<String> getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void startListening() {
+        if (chatsListener != null) { return; }
+        chatsListener = repository.listenToChats(chats, errorMessage);
+    }
+
+    public void clearErrorMessage() {
+        errorMessage.setValue(null);
     }
 
     @Override
     protected void onCleared() {
-        if (registration != null) {
-            registration.remove();
+        if (chatsListener != null) {
+            chatsListener.remove();
+            chatsListener = null;
         }
+
+        super.onCleared();
     }
 }

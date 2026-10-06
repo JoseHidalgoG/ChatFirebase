@@ -207,12 +207,12 @@ public class ChatFragment extends Fragment {
             return;
         }
 
-        viewModel.sendTextMessage(text);
+        viewModel.sendTextMessage(otherUserId, text);
     }
 
     private void onImageSelected(Uri imageUri) {
         if (imageUri != null) {
-            viewModel.sendImageMessage(imageUri);
+            viewModel.sendImageMessage(otherUserId, imageUri);
         }
     }
 }

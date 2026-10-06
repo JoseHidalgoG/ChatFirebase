@@ -79,7 +79,7 @@ public class ChatViewModel extends AndroidViewModel {
         );
     }
 
-    public void sendTextMessage(String text) {
+    public void sendTextMessage(String otherUserId, String text) {
         if (currentChatId == null || currentChatId.trim().isEmpty()) {
             errorMessage.setValue("No se ha cargado una conversación.");
             return;
@@ -99,6 +99,7 @@ public class ChatViewModel extends AndroidViewModel {
 
         messageRepository.sendTextMessage(
                 currentChatId,
+                otherUserId,
                 text,
                 new MessageRepository.OperationCallback() {
                     @Override
@@ -118,7 +119,7 @@ public class ChatViewModel extends AndroidViewModel {
         );
     }
 
-    public void sendImageMessage(Uri imageUri) {
+    public void sendImageMessage(String otherUserId, Uri imageUri) {
         if (currentChatId == null || currentChatId.trim().isEmpty()) {
             errorMessage.setValue("No se ha cargado una conversación.");
             return;
@@ -136,6 +137,7 @@ public class ChatViewModel extends AndroidViewModel {
 
         messageRepository.sendImageMessage(
                 currentChatId,
+                otherUserId,
                 imageUri,
                 new MessageRepository.OperationCallback() {
                     @Override

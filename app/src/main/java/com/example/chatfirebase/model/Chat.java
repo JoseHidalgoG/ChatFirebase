@@ -15,10 +15,12 @@ public class Chat {
     private String createdBy;
     private long createdAt;
 
+    private String contactName;
+    private String contactPhotoUrl;
+
     public Chat() { }
 
-    public Chat(String id, List<String> participants, String type,
-                String name, String createdBy) {
+    public Chat(String id, List<String> participants, String type, String name, String createdBy) {
         this.id = id;
         this.participants = participants != null
                 ? participants : new ArrayList<>();
@@ -101,4 +103,9 @@ public class Chat {
     public void setCreatedAt(long createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getContactName() { return contactName; }
+    public void setContactName(String contactName) { this.contactName = contactName; }
+    public String getContactPhotoUrl() { return contactPhotoUrl; }
+    public void setContactPhotoUrl(String contactPhotoUrl) { this.contactPhotoUrl = contactPhotoUrl; }
 }

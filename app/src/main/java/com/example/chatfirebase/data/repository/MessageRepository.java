@@ -107,11 +107,7 @@ public class MessageRepository {
     /**
      * Envía un mensaje de texto a una conversación.
      */
-    public void sendTextMessage(
-            String chatId,
-            String text,
-            OperationCallback callback
-    ) {
+    public void sendTextMessage(String chatId, String otherUserId, String text, OperationCallback callback) {
         if (auth.getCurrentUser() == null) {
             callback.onError(
                     new IllegalStateException(
@@ -140,6 +136,11 @@ public class MessageRepository {
         String senderId = auth.getCurrentUser().getUid();
         String cleanText = text.trim();
 
+        if (otherUserId == null || otherUserId.trim().isEmpty() || senderId.equals(otherUserId)) {
+            callback.onError(new IllegalArgumentException("El contacto no es válido."));
+            return;
+        }
+
         var chatRef = db.collection("chats").document(chatId);
         var messageRef = chatRef.collection("messages").document();
 
@@ -155,36 +156,48 @@ public class MessageRepository {
         db.runTransaction(transaction -> {
                     DocumentSnapshot chatSnapshot = transaction.get(chatRef);
 
-                    if (!chatSnapshot.exists()) {
-                        throw new IllegalStateException(
-                                "La conversación no existe."
-                        );
-                    }
+                    List<String> participants = new ArrayList<>();
+                    participants.add(senderId);
+                    participants.add(otherUserId);
 
-                    Object participantsObject = chatSnapshot.get("participants");
+                    if (chatSnapshot.exists()) {
+                        Object participantsObject = chatSnapshot.get("participants");
 
-                    if (!(participantsObject instanceof List)) {
-                        throw new IllegalStateException(
-                                "La conversación no tiene participantes válidos."
-                        );
-                    }
+                        if (!(participantsObject instanceof List)) {
+                            throw new IllegalStateException(
+                                    "La conversación no tiene participantes válidos."
+                            );
+                        }
 
-                    List<?> participants = (List<?>) participantsObject;
+                        List<?> existingParticipants = (List<?>) participantsObject;
 
-                    if (!participants.contains(senderId)) {
-                        throw new SecurityException(
-                                "No perteneces a esta conversación."
-                        );
+                        if (!existingParticipants.contains(senderId)
+                                || !existingParticipants.contains(otherUserId)
+                                || !"private".equals(chatSnapshot.getString("type"))) {
+                            throw new SecurityException(
+                                    "La conversación no corresponde a estos participantes."
+                            );
+                        }
                     }
 
                     transaction.set(messageRef, messageData);
 
                     Map<String, Object> chatUpdates = new HashMap<>();
+                    chatUpdates.put("participants", participants);
+                    chatUpdates.put("type", "private");
+                    chatUpdates.put("createdBy", senderId);
                     chatUpdates.put("lastMessage", cleanText);
                     chatUpdates.put("lastMessageAt", FieldValue.serverTimestamp());
                     chatUpdates.put("lastMessageSenderId", senderId);
 
-                    transaction.update(chatRef, chatUpdates);
+                    if (!chatSnapshot.exists()) {
+                        chatUpdates.put("name", null);
+                        chatUpdates.put("createdAt", FieldValue.serverTimestamp());
+
+                        transaction.set(chatRef, chatUpdates);
+                    } else {
+                        transaction.update(chatRef, chatUpdates);
+                    }
 
                     return null;
                 }).addOnSuccessListener(unused -> callback.onSuccess())
@@ -195,11 +208,16 @@ public class MessageRepository {
      * ENVIAR IMAGENES
      * ***/
 
-    public void sendImageMessage(String chatId, Uri imageUri, OperationCallback callback) {
+    public void sendImageMessage(String chatId, String otherUserId, Uri imageUri, OperationCallback callback) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser == null) {
             callback.onError(new IllegalStateException("Debes iniciar sesión."));
+            return;
+        }
+
+        if (otherUserId == null || otherUserId.trim().isEmpty() || currentUser.getUid().equals(otherUserId)) {
+            callback.onError(new IllegalArgumentException("El contacto no es válido."));
             return;
         }
 
@@ -287,7 +305,7 @@ public class MessageRepository {
                     );
                 }
 
-                saveImageMessage(chatId, senderId, imageBase64, callback);
+                saveImageMessage(chatId, senderId, otherUserId, imageBase64, callback);
 
             } catch (Exception e) {
                 callback.onError(e);
@@ -344,7 +362,7 @@ public class MessageRepository {
     }
 
 
-    private void saveImageMessage(String chatId, String senderId, String imageBase64, OperationCallback callback) {
+    private void saveImageMessage(String chatId, String senderId, String otherUserId, String imageBase64, OperationCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         DocumentReference chatRef = db.collection("chats").document(chatId);
@@ -360,44 +378,53 @@ public class MessageRepository {
         messageData.put("createdAt", FieldValue.serverTimestamp());
 
         db.runTransaction(transaction -> {
-            DocumentSnapshot chatSnapshot =
-                    transaction.get(chatRef);
+                    DocumentSnapshot chatSnapshot = transaction.get(chatRef);
 
-            if (!chatSnapshot.exists()) {
-                throw new FirebaseFirestoreException(
-                        "La conversación no existe.",
-                        FirebaseFirestoreException.Code.NOT_FOUND
-                );
-            }
+                    List<String> participants = new ArrayList<>();
+                    participants.add(senderId);
+                    participants.add(otherUserId);
 
-            List<String> participants =
-                    (List<String>) chatSnapshot.get("participants");
+                    if (chatSnapshot.exists()) {
+                        Object participantsObject = chatSnapshot.get("participants");
 
-            if (participants == null || !participants.contains(senderId)) {
-                throw new FirebaseFirestoreException(
-                        "No perteneces a esta conversación.",
-                        FirebaseFirestoreException.Code.PERMISSION_DENIED
-                );
-            }
+                        if (!(participantsObject instanceof List)) {
+                            throw new IllegalStateException(
+                                    "La conversación no tiene participantes válidos."
+                            );
+                        }
 
-            transaction.set(messageRef, messageData);
+                        List<?> existingParticipants = (List<?>) participantsObject;
 
-            transaction.update(chatRef, "lastMessage", "📷 Imagen");
-            transaction.update(
-                    chatRef,
-                    "lastMessageAt",
-                    FieldValue.serverTimestamp()
-            );
-            transaction.update(
-                    chatRef,
-                    "lastMessageSenderId",
-                    senderId
-            );
+                        if (!existingParticipants.contains(senderId)
+                                || !existingParticipants.contains(otherUserId)
+                                || !"private".equals(chatSnapshot.getString("type"))) {
+                            throw new SecurityException(
+                                    "La conversación no corresponde a estos participantes."
+                            );
+                        }
+                    }
 
-            return null;
+                    transaction.set(messageRef, messageData);
 
-        }).addOnSuccessListener(unused ->
-                callback.onSuccess()
-        ).addOnFailureListener(callback::onError);
+                    Map<String, Object> chatUpdates = new HashMap<>();
+                    chatUpdates.put("participants", participants);
+                    chatUpdates.put("type", "private");
+                    chatUpdates.put("createdBy", senderId);
+                    chatUpdates.put("lastMessage", "📷 Imagen");
+                    chatUpdates.put("lastMessageAt", FieldValue.serverTimestamp());
+                    chatUpdates.put("lastMessageSenderId", senderId);
+
+                    if (!chatSnapshot.exists()) {
+                        chatUpdates.put("name", null);
+                        chatUpdates.put("createdAt", FieldValue.serverTimestamp());
+
+                        transaction.set(chatRef, chatUpdates);
+                    } else {
+                        transaction.update(chatRef, chatUpdates);
+                    }
+
+                    return null;
+                }).addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(callback::onError);
     }
 }

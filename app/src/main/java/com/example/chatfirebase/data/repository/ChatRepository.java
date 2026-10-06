@@ -1,5 +1,7 @@
 package com.example.chatfirebase.data.repository;
 
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.chatfirebase.model.Chat;
@@ -51,12 +53,6 @@ public class ChatRepository {
             return;
         }
 
-        // Ambos usuarios generan el mismo ID, sin importar quién inicia.
-        List<String> participants = Arrays.asList(
-                currentUserId,
-                otherUserId
-        );
-
         String firstId = currentUserId.compareTo(otherUserId) < 0
                 ? currentUserId : otherUserId;
 
@@ -64,42 +60,7 @@ public class ChatRepository {
                 ? otherUserId : currentUserId;
 
         String chatId = "private_" + firstId + "_" + secondId;
-
-        DocumentReference chatRef = firestore.collection("chats").document(chatId);
-
-        firestore.runTransaction(transaction -> {
-                    DocumentSnapshot snapshot = transaction.get(chatRef);
-
-                    if (!snapshot.exists()) {
-                        Map<String, Object> chatData = new HashMap<>();
-                        chatData.put("participants", participants);
-                        chatData.put("type", "private");
-                        chatData.put("name", null);
-                        chatData.put("createdBy", currentUserId);
-                        chatData.put("createdAt", FieldValue.serverTimestamp());
-                        chatData.put("lastMessage", "");
-                        chatData.put("lastMessageAt", FieldValue.serverTimestamp());
-                        chatData.put("lastMessageSenderId", "");
-
-                        transaction.set(chatRef, chatData);
-                    } else {
-                        // Verificar que el documento corresponda a esta pareja.
-                        List<?> existingParticipants =
-                                (List<?>) snapshot.get("participants");
-
-                        if (existingParticipants == null
-                                || !existingParticipants.contains(currentUserId)
-                                || !existingParticipants.contains(otherUserId)
-                                || !"private".equals(snapshot.getString("type"))) {
-                            throw new IllegalStateException(
-                                    "El chat existente no corresponde a esta conversación."
-                            );
-                        }
-                    }
-
-                    return chatId;
-                }).addOnSuccessListener(callback::onSuccess)
-                .addOnFailureListener(callback::onError);
+        callback.onSuccess(chatId);
     }
 
     public ListenerRegistration listenToChats(
@@ -128,19 +89,109 @@ public class ChatRepository {
                     }
 
                     List<Chat> result = new ArrayList<>();
-
                     if (snapshot != null) {
-                        for (var document : snapshot.getDocuments()) {
-                            Chat chat = document.toObject(Chat.class);
+                        for (DocumentSnapshot document : snapshot.getDocuments()) {
 
-                            if (chat != null) {
-                                chat.setId(document.getId());
-                                result.add(chat);
+                            Chat chat = new Chat();
+
+                            chat.setId(document.getId());
+                            chat.setParticipants((List<String>) document.get("participants"));
+                            chat.setType(document.getString("type"));
+                            chat.setName(document.getString("name"));
+                            chat.setCreatedBy(document.getString("createdBy"));
+                            chat.setLastMessage(document.getString("lastMessage"));
+                            chat.setLastMessageSenderId(document.getString("lastMessageSenderId"));
+
+                            com.google.firebase.Timestamp createdAt = document.getTimestamp("createdAt");
+
+                            if (createdAt != null) {
+                                chat.setCreatedAt(createdAt.toDate().getTime());
+                            } else {
+                                chat.setCreatedAt(0L);
                             }
+
+                            com.google.firebase.Timestamp lastMessageAt = document.getTimestamp("lastMessageAt");
+
+                            if (lastMessageAt != null) {
+                                chat.setLastMessageAt(lastMessageAt.toDate().getTime());
+                            } else {
+                                chat.setLastMessageAt(0L);
+                            }
+
+                            result.add(chat);
                         }
                     }
 
-                    chats.setValue(result);
+                    loadChatProfiles(result, chats);
                 });
     }
+
+    private void loadChatProfiles(List<Chat> chats, MutableLiveData<List<Chat>> liveChats) {
+        if (chats.isEmpty()) {
+            liveChats.setValue(chats);
+            return;
+        }
+
+        final int[] pending = {chats.size()};
+
+        for (Chat chat : chats) {
+            // Para un grupo, el nombre está en el propio documento.
+            if ("group".equals(chat.getType())) {
+                finishProfileLoad(chats, pending, liveChats);
+                continue;
+            }
+
+            String currentUid = auth.getCurrentUser() != null
+                    ? auth.getCurrentUser().getUid()
+                    : null;
+
+            String otherUserId = null;
+
+            if (chat.getParticipants() != null) {
+                for (String uid : chat.getParticipants()) {
+                    if (uid != null && !uid.equals(currentUid)) {
+                        otherUserId = uid;
+                        break;
+                    }
+                }
+            }
+
+            if (otherUserId == null) {
+                finishProfileLoad(chats, pending, liveChats);
+                continue;
+            }
+
+            firestore.collection("users")
+                    .document(otherUserId)
+                    .get()
+                    .addOnSuccessListener(userDocument -> {
+                        // nombre y foto para la interfaz, no se escriben en el documento del chat
+                        chat.setContactName(userDocument.getString("name"));
+                        chat.setContactPhotoUrl(userDocument.getString("photoUrl"));
+                        finishProfileLoad(chats, pending, liveChats);
+                    })
+                    .addOnFailureListener(exception -> {
+                        Log.w(
+                                "ChatRepository",
+                                "No se pudo cargar el perfil del participante",
+                                exception
+                        );
+
+                        finishProfileLoad(chats, pending, liveChats);
+                    });
+        }
+    }
+
+    private void finishProfileLoad(
+            List<Chat> chats,
+            int[] pending,
+            MutableLiveData<List<Chat>> liveChats
+    ) {
+        pending[0]--;
+
+        if (pending[0] == 0) {
+            liveChats.setValue(chats);
+        }
+    }
+
 }

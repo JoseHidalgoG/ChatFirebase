@@ -10,7 +10,12 @@
         android:id="@+id/chatsFragment"
         android:name="com.example.chatfirebase.ui.chats.ChatsFragment"
         android:label="@string/nav_chats"
-        tools:layout="@layout/fragment_chats" />
+        tools:layout="@layout/fragment_chats" >
+
+        <action
+            android:id="@+id/action_chatsFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/contactsFragment"
