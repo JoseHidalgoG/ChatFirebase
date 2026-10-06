@@ -1,9 +1,13 @@
 package com.example.chatfirebase.ui.chats;
 
+import android.net.Uri;
+
+import android.app.Application;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.AndroidViewModel;
 
 import com.example.chatfirebase.data.repository.MessageRepository;
 import com.example.chatfirebase.model.Message;
@@ -12,7 +16,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatViewModel extends ViewModel {
+public class ChatViewModel extends AndroidViewModel {
 
     private final MessageRepository messageRepository;
     private final MutableLiveData<List<Message>> messages = new MutableLiveData<>(new ArrayList<>());
@@ -22,8 +26,9 @@ public class ChatViewModel extends ViewModel {
     private ListenerRegistration messagesListener;
     private String currentChatId;
 
-    public ChatViewModel() {
-        messageRepository = new MessageRepository();
+    public ChatViewModel(@NonNull Application application) {
+        super(application);
+        messageRepository = new MessageRepository(application.getApplicationContext());
     }
 
     public LiveData<List<Message>> getMessages() {
@@ -107,6 +112,46 @@ public class ChatViewModel extends ViewModel {
                         sending.postValue(false);
                         errorMessage.postValue(
                                 getReadableError(error)
+                        );
+                    }
+                }
+        );
+    }
+
+    public void sendImageMessage(Uri imageUri) {
+        if (currentChatId == null || currentChatId.trim().isEmpty()) {
+            errorMessage.setValue("No se ha cargado una conversación.");
+            return;
+        }
+
+        if (imageUri == null) {
+            errorMessage.setValue("No se ha seleccionado una imagen.");
+            return;
+        }
+
+        if (Boolean.TRUE.equals(sending.getValue())) { return; }
+
+        messageSent.setValue(false);
+        sending.setValue(true);
+
+        messageRepository.sendImageMessage(
+                currentChatId,
+                imageUri,
+                new MessageRepository.OperationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        sending.postValue(false);
+                        messageSent.postValue(true);
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+                        sending.postValue(false);
+
+                        errorMessage.postValue(
+                                error != null && error.getMessage() != null
+                                        ? error.getMessage()
+                                        : "No se pudo enviar la imagen."
                         );
                     }
                 }

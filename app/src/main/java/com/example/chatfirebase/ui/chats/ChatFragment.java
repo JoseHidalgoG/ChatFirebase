@@ -22,6 +22,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatfirebase.R;
 import com.google.firebase.auth.FirebaseAuth;
+import android.net.Uri;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 public class ChatFragment extends Fragment {
 
@@ -38,6 +41,12 @@ public class ChatFragment extends Fragment {
     private String chatId;
     private String otherUserId;
     private String otherUserName;
+
+    private final ActivityResultLauncher<String> imagePicker =
+            registerForActivityResult(
+                    new ActivityResultContracts.GetContent(),
+                    this::onImageSelected
+            );
 
     public ChatFragment() {
         super(R.layout.fragment_chat);
@@ -186,11 +195,7 @@ public class ChatFragment extends Fragment {
 
         // conectar al selector de imagenes!!!.
         btnAttachImage.setOnClickListener(v ->
-                Toast.makeText(
-                        requireContext(),
-                        "La opción de imágenes se implementará después.",
-                        Toast.LENGTH_SHORT
-                ).show()
+                imagePicker.launch("image/*")
         );
     }
 
@@ -203,5 +208,11 @@ public class ChatFragment extends Fragment {
         }
 
         viewModel.sendTextMessage(text);
+    }
+
+    private void onImageSelected(Uri imageUri) {
+        if (imageUri != null) {
+            viewModel.sendImageMessage(imageUri);
+        }
     }
 }

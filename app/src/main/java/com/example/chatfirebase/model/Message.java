@@ -8,7 +8,8 @@ public class Message {
     private String senderId;
     private String text;
     private String type;
-    private String imageUrl;
+    private String imageUrl; //lo conservo para mantener la compatibilidad, pero no la usaremos
+    private String imageBase64;
     private Timestamp createdAt;
     public Message() {}
 
@@ -61,6 +62,10 @@ public class Message {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+    public String getImageBase64() { return imageBase64; }
+
+    public void setImageBase64(String imageBase64) { this.imageBase64 = imageBase64; }
 
     public Timestamp getCreatedAt() {
         return createdAt;

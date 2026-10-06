@@ -7,6 +7,14 @@
     android:paddingTop="4dp"
     android:paddingBottom="4dp">
 
+    <ImageView
+        android:id="@+id/image_message"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:contentDescription="Imagen compartida" />
+
     <TextView
         android:id="@+id/text_message"
         android:layout_width="wrap_content"
