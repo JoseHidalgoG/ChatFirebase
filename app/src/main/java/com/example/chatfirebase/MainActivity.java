@@ -16,6 +16,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.chatfirebase.data.repository.ProfileRepository;
 import com.example.chatfirebase.databinding.ActivityMainBinding;
 import com.example.chatfirebase.ui.auth.LoginActivity;
 import com.example.chatfirebase.ui.main.MainViewModel;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private AppBarConfiguration appBarConfiguration;
+    private final ProfileRepository profileRepository = new ProfileRepository();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,5 +150,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onSupportNavigateUp();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        profileRepository.updatePresence(true);
+    }
+
+    @Override
+    protected void onStop() {
+        profileRepository.updatePresence(false);
+        super.onStop();
     }
 }

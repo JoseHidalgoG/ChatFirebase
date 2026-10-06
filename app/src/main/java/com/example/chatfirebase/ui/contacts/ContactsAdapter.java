@@ -3,6 +3,8 @@ package com.example.chatfirebase.ui.contacts;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -10,14 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatfirebase.R;
 import com.example.chatfirebase.model.User;
+import com.example.chatfirebase.utils.UserPhotoUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactViewHolder> {
+public class ContactsAdapter
+        extends RecyclerView.Adapter<ContactsAdapter.ContactViewHolder> {
+
     public interface OnContactClickListener {
         void onContactClick(User user);
+        void onChatClick(User user);
     }
 
     private final List<User> contacts = new ArrayList<>();
@@ -39,7 +44,10 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
     @NonNull
     @Override
-    public ContactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ContactViewHolder onCreateViewHolder(
+            @NonNull ViewGroup parent,
+            int viewType
+    ) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_contact, parent, false);
 
@@ -47,12 +55,13 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     }
 
     @Override
-    public void onBindViewHolder( @NonNull ContactViewHolder holder, int position) {
+    public void onBindViewHolder(
+            @NonNull ContactViewHolder holder,
+            int position
+    ) {
         User user = contacts.get(position);
 
         String name = user.getName();
-        String email = user.getEmail();
-
         holder.name.setText(
                 name == null || name.trim().isEmpty()
                         ? "Usuario"
@@ -60,18 +69,24 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         );
 
         holder.email.setText(
-                email == null ? "" : email
+                user.getEmail() == null ? "" : user.getEmail()
         );
 
-        String initial = (name == null || name.trim().isEmpty())
-                ? "U"
-                : name.trim().substring(0, 1).toUpperCase(Locale.ROOT);
-
-        holder.avatar.setText(initial);
+        UserPhotoUtils.loadPhoto(
+                holder.avatar,
+                user.getPhotoBase64(),
+                user.getPhotoUrl()
+        );
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onContactClick(user);
+            }
+        });
+
+        holder.openChatButton.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onChatClick(user);
             }
         });
     }
@@ -82,16 +97,18 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     }
 
     static class ContactViewHolder extends RecyclerView.ViewHolder {
-        TextView avatar;
+        ImageView avatar;
         TextView name;
         TextView email;
+        Button openChatButton;
 
         ContactViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            avatar = itemView.findViewById(R.id.text_avatar);
+            avatar = itemView.findViewById(R.id.image_contact_avatar);
             name = itemView.findViewById(R.id.text_contact_name);
             email = itemView.findViewById(R.id.text_contact_email);
+            openChatButton = itemView.findViewById(R.id.button_open_chat);
         }
     }
 }

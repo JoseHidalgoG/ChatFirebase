@@ -8,18 +8,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.chatfirebase.R;
-import com.example.chatfirebase.databinding.FragmentContactsBinding;
-import com.example.chatfirebase.model.User;
-
-import android.os.Bundle;
-import android.widget.Toast;
-
-import androidx.navigation.fragment.NavHostFragment;
-
 import com.example.chatfirebase.data.repository.ChatRepository;
+import com.example.chatfirebase.databinding.FragmentContactsBinding;
 import com.example.chatfirebase.model.User;
 
 public class ContactsFragment extends Fragment {
@@ -40,9 +34,7 @@ public class ContactsFragment extends Fragment {
             @Nullable Bundle savedInstanceState
     ) {
         binding = FragmentContactsBinding.inflate(
-                inflater,
-                container,
-                false
+                inflater, container, false
         );
 
         return binding.getRoot();
@@ -55,12 +47,23 @@ public class ContactsFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-        adapter = new ContactsAdapter(this::onContactSelected);
+        adapter = new ContactsAdapter(
+                new ContactsAdapter.OnContactClickListener() {
+                    @Override
+                    public void onContactClick(User user) {
+                        openProfile(user);
+                    }
+
+                    @Override
+                    public void onChatClick(User user) {
+                        openPrivateChat(user);
+                    }
+                }
+        );
 
         binding.recyclerContacts.setLayoutManager(
                 new LinearLayoutManager(requireContext())
         );
-
         binding.recyclerContacts.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this)
@@ -73,6 +76,8 @@ public class ContactsFragment extends Fragment {
         viewModel.getContacts().observe(
                 getViewLifecycleOwner(),
                 users -> {
+                    if (binding == null) return;
+
                     adapter.setContacts(users);
 
                     boolean empty = users == null || users.isEmpty();
@@ -80,7 +85,6 @@ public class ContactsFragment extends Fragment {
                     binding.emptyState.setVisibility(
                             empty ? View.VISIBLE : View.GONE
                     );
-
                     binding.recyclerContacts.setVisibility(
                             empty ? View.GONE : View.VISIBLE
                     );
@@ -90,7 +94,8 @@ public class ContactsFragment extends Fragment {
         viewModel.getError().observe(
                 getViewLifecycleOwner(),
                 message -> {
-                    if (message != null && !message.isEmpty()) {
+                    if (message != null && !message.isEmpty()
+                            && isAdded()) {
                         Toast.makeText(
                                 requireContext(),
                                 message,
@@ -101,12 +106,24 @@ public class ContactsFragment extends Fragment {
         );
     }
 
-    private void onContactSelected(User contact) {
+    private void openProfile(User user) {
+        Bundle args = new Bundle();
+        args.putString("userId", user.getUid());
+
+        NavHostFragment.findNavController(this).navigate(
+                R.id.action_contactsFragment_to_profileFragment,
+                args
+        );
+    }
+
+    private void openPrivateChat(User contact) {
         viewModel.openPrivateChat(
                 contact.getUid(),
                 new ChatRepository.Callback() {
                     @Override
                     public void onSuccess(String chatId) {
+                        if (!isAdded()) return;
+
                         Bundle args = new Bundle();
                         args.putString("chatId", chatId);
                         args.putString("otherUserId", contact.getUid());
@@ -122,14 +139,16 @@ public class ContactsFragment extends Fragment {
 
                     @Override
                     public void onError(Exception error) {
-                        if (getContext() != null) {
-                            Toast.makeText(
-                                    requireContext(),
-                                    "No se pudo abrir el chat: "
-                                            + error.getLocalizedMessage(),
-                                    Toast.LENGTH_LONG
-                            ).show();
-                        }
+                        if (!isAdded()) return;
+
+                        String detail = error.getLocalizedMessage();
+                        Toast.makeText(
+                                requireContext(),
+                                "No se pudo abrir el chat: "
+                                        + (detail != null
+                                        ? detail : "error desconocido"),
+                                Toast.LENGTH_LONG
+                        ).show();
                     }
                 }
         );
@@ -138,7 +157,6 @@ public class ContactsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
         binding = null;
         adapter = null;
     }

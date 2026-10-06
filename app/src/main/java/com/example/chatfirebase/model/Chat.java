@@ -18,6 +18,8 @@ public class Chat {
     private String contactName;
     private String contactPhotoUrl;
 
+    private String contactPhotoBase64;
+
     public Chat() { }
 
     public Chat(String id, List<String> participants, String type, String name, String createdBy) {
@@ -108,4 +110,12 @@ public class Chat {
     public void setContactName(String contactName) { this.contactName = contactName; }
     public String getContactPhotoUrl() { return contactPhotoUrl; }
     public void setContactPhotoUrl(String contactPhotoUrl) { this.contactPhotoUrl = contactPhotoUrl; }
+
+    public String getContactPhotoBase64() {
+        return contactPhotoBase64;
+    }
+
+    public void setContactPhotoBase64(String contactPhotoBase64) {
+        this.contactPhotoBase64 = contactPhotoBase64;
+    }
 }

@@ -9,9 +9,11 @@ public class User {
     private String uid;
     private String name;
     private String email;
-    private String photoUrl;
+    private String photoUrl; //dejar por compatibildad
     private String fcmToken;
     private long lastSeen;
+    private String photoBase64;
+    private boolean online;
 
     public User() {
     }
@@ -70,4 +72,12 @@ public class User {
     public void setLastSeen(long lastSeen) {
         this.lastSeen = lastSeen;
     }
+
+    public String getPhotoBase64() { return photoBase64; }
+
+    public void setPhotoBase64(String photoBase64) { this.photoBase64 = photoBase64; }
+
+    public boolean isOnline() { return online; }
+
+    public void setOnline(boolean online) { this.online = online; }
 }

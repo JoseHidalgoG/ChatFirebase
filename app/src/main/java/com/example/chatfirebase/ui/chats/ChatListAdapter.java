@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import com.example.chatfirebase.utils.UserPhotoUtils;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder> {
     public interface OnChatClickListener {
@@ -101,22 +102,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             holder.time.setVisibility(View.GONE);
         }
 
-        String photoUrl = chat.getContactPhotoUrl();
-
-        if (!"group".equals(chat.getType())
-                && photoUrl != null
-                && !photoUrl.trim().isEmpty()) {
-
-            Glide.with(holder.itemView)
-                    .load(photoUrl)
-                    .placeholder(R.drawable.ic_chat)
-                    .error(R.drawable.ic_chat)
-                    .circleCrop()
-                    .into(holder.avatar);
-
-        } else {
+        if ("group".equals(chat.getType())) {
             Glide.with(holder.itemView).clear(holder.avatar);
             holder.avatar.setImageResource(R.drawable.ic_chat);
+        } else {
+            UserPhotoUtils.loadPhoto(
+                    holder.avatar,
+                    chat.getContactPhotoBase64(),
+                    chat.getContactPhotoUrl()
+            );
         }
 
         holder.itemView.setOnClickListener(v -> {

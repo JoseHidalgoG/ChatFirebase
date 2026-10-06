@@ -165,9 +165,9 @@ public class ChatRepository {
                     .document(otherUserId)
                     .get()
                     .addOnSuccessListener(userDocument -> {
-                        // nombre y foto para la interfaz, no se escriben en el documento del chat
                         chat.setContactName(userDocument.getString("name"));
                         chat.setContactPhotoUrl(userDocument.getString("photoUrl"));
+                        chat.setContactPhotoBase64(userDocument.getString("photoBase64"));
                         finishProfileLoad(chats, pending, liveChats);
                     })
                     .addOnFailureListener(exception -> {
