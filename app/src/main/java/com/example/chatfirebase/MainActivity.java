@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -41,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private MainViewModel mainViewModel;
     private final ProfileRepository profileRepository = new ProfileRepository();
 
-    // Si se niega el permiso la app funciona igual, solo que sin notificaciones.
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.RequestPermission(),
@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        // Al tocar una notificación se llega aquí directamente, quizá con la sesión ya cerrada.
         if (!mainViewModel.isLoggedIn()) {
             openLogin();
             return;
@@ -71,15 +70,31 @@ public class MainActivity extends AppCompatActivity {
                     Insets systemBars = windowInsets.getInsets(
                             WindowInsetsCompat.Type.systemBars()
                     );
+                    Insets ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
+
+                    boolean keyboardOpen = ime.bottom > 0;
+                    boolean bottomNavShown = binding.bottomNav.getVisibility() == View.VISIBLE;
+
+
+                    int rootBottom = keyboardOpen
+                            ? ime.bottom
+                            : (bottomNavShown ? 0 : systemBars.bottom);
 
                     view.setPadding(
                             systemBars.left,
                             systemBars.top,
                             systemBars.right,
-                            systemBars.bottom
+                            rootBottom
                     );
 
-                    return windowInsets;
+                    binding.bottomNav.setPadding(
+                            0,
+                            0,
+                            0,
+                            bottomNavShown && !keyboardOpen ? systemBars.bottom : 0
+                    );
+
+                    return WindowInsetsCompat.CONSUMED;
                 }
         );
 
@@ -109,6 +124,12 @@ public class MainActivity extends AppCompatActivity {
                     } else if (destinationId == R.id.profileFragment) {
                         binding.toolbar.setTitle("Perfil");
                     }
+
+                    // Como en otras apps de mensajería, la conversación ocupa toda la pantalla.
+                    binding.bottomNav.setVisibility(
+                            destinationId == R.id.chatFragment ? View.GONE : View.VISIBLE
+                    );
+                    ViewCompat.requestApplyInsets(binding.main);
                 }
         );
 
