@@ -1,55 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:padding="12dp"
-    android:clickable="true"
-    android:focusable="true"
-    android:background="?android:attr/selectableItemBackground">
+    android:orientation="horizontal"
+    android:padding="12dp">
 
-    <TextView
-        android:id="@+id/text_avatar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:gravity="center"
-        android:text="U"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:background="@drawable/contact_avatar_bg"
-        android:textColor="#FFFFFF" />
+    <ImageView
+        android:id="@+id/image_contact_avatar"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:contentDescription="Foto del contacto"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_person" />
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:layout_marginStart="12dp"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/text_contact_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nombre del usuario"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="?android:attr/textColorPrimary"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:text="Usuario" />
 
         <TextView
             android:id="@+id/text_contact_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:text="correo@ejemplo.com"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:text="correo@ejemplo.com" />
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/button_open_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chat" />
 
 </LinearLayout>

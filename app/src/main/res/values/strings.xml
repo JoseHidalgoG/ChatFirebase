@@ -70,4 +70,21 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+
+    <string name="nav_chats">Chats</string>
+    <string name="nav_contacts">Contactos</string>
+    <string name="nav_profile">Perfil</string>
+
+    <string name="chats_empty_title">Todavía no tienes chats</string>
+    <string name="chats_empty_message">Cuando inicies una conversación, aparecerá aquí.</string>
+
+    <string name="contacts_empty_title">Todavía no hay otros usuarios</string>
+    <string name="contacts_empty_message">Cuando alguien más se registre, aparecerá aquí.</string>
+
+    <!-- Notificaciones -->
+    <string name="notification_channel_id" translatable="false">messages</string>
+    <string name="notification_channel_name">Mensajes</string>
+    <string name="notification_channel_description">Avisos de mensajes nuevos</string>
+    <string name="notification_default_title">Nuevo mensaje</string>
+
 </resources>

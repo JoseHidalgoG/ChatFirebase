@@ -3,26 +3,69 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/chatsFragment">
 
+    <!-- Un destino por pestaña; los ids coinciden con los de bottom_nav_menu. -->
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.example.chatfirebase.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        android:id="@+id/chatsFragment"
+        android:name="com.example.chatfirebase.ui.chats.ChatsFragment"
+        android:label="@string/nav_chats"
+        tools:layout="@layout/fragment_chats" >
 
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            android:id="@+id/action_chatsFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+        <action
+            android:id="@+id/action_contactsFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
     </fragment>
+
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.chatfirebase.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        android:id="@+id/contactsFragment"
+        android:name="com.example.chatfirebase.ui.contacts.ContactsFragment"
+        android:label="@string/nav_contacts"
+        tools:layout="@layout/fragment_contacts">
+        <action
+            android:id="@+id/action_contactsFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+        <action
+            android:id="@+id/action_contactsFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.chatfirebase.ui.profile.ProfileFragment"
+        android:label="@string/nav_profile"
+        tools:layout="@layout/fragment_profile">
+        <argument
+            android:name="userId"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <!-- Esto se refiere al chat individual, no a la lista de chats -->
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.chatfirebase.ui.chats.ChatFragment"
+        android:label="Conversación"
+        tools:layout="@layout/fragment_chat">
+
+        <argument
+            android:name="chatId"
+            app:argType="string" />
+
+        <argument
+            android:name="otherUserId"
+            app:argType="string" />
+
+        <argument
+            android:name="otherUserName"
+            app:argType="string" />
 
         <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+            android:id="@+id/action_chatFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+
     </fragment>
 </navigation>
