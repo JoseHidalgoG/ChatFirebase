@@ -51,5 +51,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.messaging)
     implementation ("com.github.bumptech.glide:glide:5.0.9")
 }
