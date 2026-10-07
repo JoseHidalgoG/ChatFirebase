@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatfirebase.R;
+import com.example.chatfirebase.notifications.NotificationHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import android.net.Uri;
 import androidx.activity.result.ActivityResultLauncher;
@@ -64,6 +65,24 @@ public class ChatFragment extends Fragment {
         setupRecyclerView();
         setupViewModel();
         setupListeners();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Mientras este chat está en pantalla no se notifican sus mensajes.
+        NotificationHelper.setActiveChatId(chatId);
+
+        if (chatId != null) {
+            NotificationHelper.cancel(requireContext(), chatId);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        NotificationHelper.clearActiveChatId(chatId);
+        super.onPause();
     }
 
     private void readArguments() {
